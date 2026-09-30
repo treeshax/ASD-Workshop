@@ -1,31 +1,30 @@
 const express=require("express")
 const fs = require("fs")
 const app=express()
+const path = require("path")
+const port = 3000
 
-// app.get('/products',(req,res)=>{
-//     fs.readFile('db.json','utf-8',(err,data)=>{
-//         if(err){
-//             return res.status(500).send('Error')
-//         }else{
-//             res.json(JSON.parse(data));
-//         }
-//     })
-// })
+const pathToFile = path.join(__dirname,"db.json")
 
-// app.listen(3000)
+async function readFile(){
+    let data = await fs.promises.readFile(pathToFile,"utf-8");
+    return JSON.parse(data);
+}
 
-app.get('/products/:id',(req,res)=>{
-    fs.readFile('db.json','utf-8',(err,data)=>{
-        if(err){
-            return res.status(500).send('Error')
-        }
-        const products=JSON.parse(data);
-        const product=products.find(p=>p.id==req.params.id)
-        if(!product){
-            return res.status(404).send('Product not found')
-        }
-        res.json(product)
+app.get('/products/:id', async(req, res) => {
+    try{
+        let products = await readFile();
+        let {id} = req.params;
+        let product = products.find((items)=>{return items.id===id});
+        res.json(product);
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send('Error');
+    }
+    
+});
 
-    })
-})
-app.listen(3000)
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
