@@ -7,13 +7,22 @@ const port = 3000
 const pathToFile = path.join(__dirname,"db.json")
 
 async function readFile(){
-    let data = await fs.promises.readFile(pathToFile,"utf-8");
-    return JSON.parse(data);
+    try{let data = await fs.promises.readFile(pathToFile,"utf-8");
+    return JSON.parse(data);}
+    catch(err){
+        console.log(err)
+    }
 }
 
+async function readFileWithDelay(){
+    await new Promise((resolve,rejet)=>{
+        setTimeout(resolve,1500)
+    })
+    return await readFile()
+}
 app.get('/products/:id', async(req, res) => {
     try{
-        let products = await readFile();
+        let products = await readFileWithDelay();
         let {id} = req.params;
         let product = products.find((items)=>{return items.id===id});
         res.json(product);
